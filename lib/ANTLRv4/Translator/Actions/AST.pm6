@@ -1,7 +1,5 @@
 use v6;
 
-use Data::Dump;
-
 class ANTLRv4::Translator::Actions::AST {
     method TOP($/) {
         make {

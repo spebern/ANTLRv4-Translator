@@ -3,7 +3,6 @@ use v6;
 unit module ANTLRv4::Translator;
 use ANTLRv4::Translator::Grammar;
 use ANTLRv4::Translator::Actions::AST;
-use Data::Dump;
 
 sub rule($rule --> Str) {
     my Str $translation = join ' ', term($rule<content>);
