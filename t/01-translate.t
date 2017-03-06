@@ -129,7 +129,7 @@ subtest sub {
         is g4-to-perl6( q{grammar Minimal; number : [a]* ;}),
            q{grammar Minimal { rule number { <[ a ]>* } }},
            'star';
-        
+
         is g4-to-perl6( q{grammar Minimal; number : [a]+ ;}),
            q{grammar Minimal { rule number { <[ a ]>+ } }},
            'plus';
@@ -147,11 +147,11 @@ subtest sub {
         is g4-to-perl6( q{grammar Minimal; number : [a-b] ;}),
            q{grammar Minimal { rule number { <[ a .. b ]> } }},
            'hyphenated character class';
-        
+
         is g4-to-perl6( q{grammar Minimal; number : [-a-b] ;}),
            q{grammar Minimal { rule number { <[ - a .. b ]> } }},
            'hyphenated character class';
-        
+
         is g4-to-perl6( q{grammar Minimal; number : [-a-b\u000d] ;}),
            q{grammar Minimal { rule number { <[ - a .. b \\x[000d] ]> } }},
            'Unicode character class';
@@ -226,7 +226,7 @@ subtest sub {
         WS
             : [ \t\n\r] + -> skip
             ;
-    }; 
+    };
     is g4-to-perl6($character-class-with-space),
        q{grammar JSON { rule WS { <[ \s \t \n \r ]>+ } }},
        'multiple comments at beginning';
@@ -252,4 +252,3 @@ subtest sub {
 }, 'longer fragments';
 
 # # vim: ft=perl6
-

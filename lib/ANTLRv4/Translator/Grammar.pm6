@@ -22,7 +22,7 @@ token DocComment {
     '/*' .*? '*/'
 }
 
-token BlockComment { 
+token BlockComment {
     '/*' .*? '*/'
 }
 
@@ -253,11 +253,11 @@ rule UNTERMINATED_STRING_LITERAL {
     <USQuoteLiteral>
 }
 
-rule BEGIN_ARGUMENT { 
+rule BEGIN_ARGUMENT {
     <LBrack> # { handleBeginArgument(); };
 }
 
-rule BEGIN_ACTION { 
+rule BEGIN_ACTION {
    <LBrace>
 }
 
@@ -652,7 +652,7 @@ rule UNTERMINATED_CHAR_SET {
 # rule grammarSpec {
 rule TOP {
     <BLANK_LINE>* <COMMENTS>?
-    <grammarType> <name=ID> <SEMI> <prequelConstruct>* <rules> <modeSpec>* 
+    <grammarType> <name=ID> <SEMI> <prequelConstruct>* <rules> <modeSpec>*
 }
 
 rule grammarType {
@@ -689,7 +689,7 @@ rule optionValue {
 rule delegateGrammars {
     <IMPORT> <delegateGrammar> ( <COMMA> <delegateGrammar> )* <SEMI>
 }
- 
+
 rule delegateGrammar {
     [
         <ID> <ASSIGN> <ID>
@@ -925,7 +925,7 @@ rule blockSuffix {
 }
 
 rule ebnfSuffix {
-    [ 
+    [
         <QUESTION> <QUESTION>?
         | <STAR> <QUESTION>?
         | <PLUS> <QUESTION>?
