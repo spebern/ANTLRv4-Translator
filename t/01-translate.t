@@ -5,8 +5,8 @@ use ANTLRv4::Translator;
 plan 7;
 
 is g4-to-perl6(q{grammar Minimal;}),
-q{grammar Minimal {  }},
-'minimal grammar';
+   q{grammar Minimal {  }},
+   'minimal grammar';
 
 subtest sub {
     is g4-to-perl6( q{grammar Minimal; number : '1' ;}),
