@@ -805,7 +805,7 @@ rule labeledAlt {
 }
 
 rule lexerRuleSpec {
-    <DOC_COMMENT>* <FRAGMENT>? <name=ID> <COLON> <lexerRuleBlock> <SEMI> <LineComment>?
+    <COMMENTS>? <FRAGMENT>? <name=ID> <COLON> <lexerRuleBlock> <SEMI> <COMMENTS>?
 }
 
 rule lexerRuleBlock {
