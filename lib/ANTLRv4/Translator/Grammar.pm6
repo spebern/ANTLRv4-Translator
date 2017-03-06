@@ -816,14 +816,9 @@ rule lexerAltList {
     <lexerAlt>+ %% <OR>
 }
 
-# TODO needs to be checked
-# lexerAlt
-#    : lexerElements lexerCommands?
-#    |
-#    // explicitly allow empty alts
-#    ;
 rule lexerAlt {
-    <elementOptions>? <lexerElements> <lexerCommands>? <COMMENTS>? | ''
+    <elementOptions>? <COMMENTS>?
+    <lexerElements> <lexerCommands>? <COMMENTS>? ['#' <label=ID> <COMMENTS>?]? | ''
 }
 
 rule lexerElements {
