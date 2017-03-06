@@ -823,10 +823,7 @@ rule lexerAltList {
 #    // explicitly allow empty alts
 #    ;
 rule lexerAlt {
-    [
-        <lexerElements> <lexerCommands>? <COMMENTS>?
-        | Nil
-    ]
+    <elementOptions>? <lexerElements> <lexerCommands>? <COMMENTS>? | ''
 }
 
 rule lexerElements {
@@ -983,12 +980,10 @@ rule terminal {
 }
 
 rule elementOptions {
-    <LT> <elementOption> ( <COMMA> <elementOption> )* <GT>
+    '<' <elementOption>+ % ',' '>'
 }
 
 rule elementOption {
-    [
-        <ID>
-        | <ID> <ASSIGN> ( <ID> | <STRING_LITERAL> )
-    ]
+    <key=ID> ['=' [<value=ID> | <value=STRING_LITERAL>] ]?
 }
+
