@@ -833,7 +833,7 @@ rule lexerAltList {
 #    ;
 rule lexerAlt {
     [
-        <lexerElements> <lexerCommands>?
+        <lexerElements> <lexerCommands>? <COMMENTS>?
         | Nil
     ]
 }
