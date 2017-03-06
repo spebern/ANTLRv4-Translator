@@ -848,7 +848,7 @@ rule labeledLexerElement {
 }
 
 rule lexerBlock {
-    <LPAREN> <lexerAltList> <RPAREN>
+    <NOT>? <LPAREN> <lexerAltList> <RPAREN>
 }
 
 rule lexerCommands {

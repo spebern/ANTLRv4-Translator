@@ -64,8 +64,9 @@ class ANTLRv4::Translator::Actions::AST {
 
     method lexerBlock($/) {
         make {
-            type     => 'capturing group',
-            contents =>  $<lexerAltList>.made,
+            type         => 'capturing group',
+            contents     =>  $<lexerAltList>.made,
+            complemented => $<NOT> ?? True !! False,
         }
     }
 

@@ -251,6 +251,10 @@ subtest sub {
     is g4-to-perl6(q{grammar CSV; row : field (',' field)* '\r'? '\n' ;}),
        q{grammar CSV { rule row { ( <field>+ %% ',' ) \r? \n } }},
        'carriage return and newline';
+
+    is g4-to-perl6(q{grammar Minimal; group : ~('0' .. '9'); }),
+       q{grammar Minimal { rule group { !( '0'..'9' ) } }},
+       'negated capturing group';
 }, 'longer fragments';
 
 # # vim: ft=perl6
