@@ -37,11 +37,6 @@ token EscSeq {
     |	$			# Invalid escape at end of file
 }
 
-# TODO check if important
-# fragment EscAny
-#    : Esc .
-#    ;
-
 token UNICODE_ESC {
     'u' <HEX_DIGIT> ** {4}
 }
@@ -496,10 +491,6 @@ rule UNTERMINATED_ACTION {
    <EOF>
 }
 
-rule ACTION_CONTENT {
-    .
-}
-
 rule OPT_DOC_COMMENT {
    <DocComment>
 }
@@ -722,7 +713,7 @@ rule actionScopeName {
 }
 
 rule actionBlock {
-    <BEGIN_ACTION> <ACTION_CONTENT>* <END_ACTION>
+    '{' .*? '}'
 }
 
 rule argActionBlock {
