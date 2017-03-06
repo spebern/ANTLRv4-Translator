@@ -2,6 +2,8 @@ use v6;
 use Test;
 use ANTLRv4::Translator;
 
+plan 7;
+
 is g4-to-perl6(q{grammar Minimal;}),
 q{grammar Minimal {  }},
 'minimal grammar';
