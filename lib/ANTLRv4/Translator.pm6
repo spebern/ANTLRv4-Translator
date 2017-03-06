@@ -33,7 +33,7 @@ sub concatenation($term --> Str) {
         if $content<type> eq 'terminal' | 'nonterminal' {
             my Str $content-translation = term($content);
 
-            my $next-content = ++$i < $term<contents> ?? $term<contents>[$i] !! Nil;
+            my $next-content = ++$i < $term<contents>.elems ?? $term<contents>[$i] !! Nil;
 
             if $next-content && $next-content<type> eq 'capturing group' {
                 if $next-content<contents>[0]<type> eq 'concatenation' {
