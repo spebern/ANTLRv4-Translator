@@ -39,6 +39,11 @@ token DIGITS
 	<DIGIT>+
 	}
 
+token NOT
+        {
+        '~'
+        }
+
 #  Allow unicode rule/token names
 
 token ID
@@ -360,7 +365,7 @@ rule lexerAltList
  
 rule lexerAlt
  	{
-	<COMMENTS>? <lexerElement>+ <lexerCommands>? <COMMENTS>? | ''
+	<COMMENTS>? <lexerElement> <lexerCommands>? <COMMENTS>? | ''
  	}
  
 rule lexerElement
@@ -380,7 +385,7 @@ rule labeledLexerElement
  
 rule lexerBlock
  	{
-	'~'? '(' <COMMENTS>? <lexerAltList>? ')'
+	<NOT>? '(' <COMMENTS>? <lexerAltList>? ')'
  	}
  
 #  E.g., channel(HIDDEN), skip, more, mode(INSIDE), push(INSIDE), pop

@@ -36,17 +36,22 @@ sub concatenation($term --> Str) {
             my $next-content = ++$i < $term<contents>.elems ?? $term<contents>[$i] !! Nil;
 
             if $next-content && $next-content<type> eq 'capturing group' {
-                if $next-content<contents>[0]<type> eq 'concatenation' {
-                    my $concatination          = $next-content<contents>[0];
-                    my $last-concatinated-term = $concatination<contents>[ * - 1];
+                if $next-content<content><type> eq 'alternation' {
+                    my $alternation = $next-content<content>;
 
-                    if term($last-concatinated-term) eq $content-translation {
-                        my Str $deliminator = join ' ', map {
-                            term($_)
-                        }, $concatination<contents>.flat[ 0 .. * -2];
-                        $translation ~= qq{ ( $content-translation+ %% $deliminator )};
-                        ++$i;
-                        next;
+                    if $alternation<contents>.elems == 1
+                      && $alternation<contents>[0]<type> eq 'concatenation' {
+                        my $concatination          = $alternation<contents>[0];
+                        my $last-concatinated-term = $concatination<contents>[ * - 1];
+
+                        if term($last-concatinated-term) eq $content-translation {
+                            my Str $deliminator = join ' ', map {
+                                term($_)
+                            }, $concatination<contents>.flat[ 0 .. * -2];
+                            $translation ~= qq{ ( $content-translation+ %% $deliminator )};
+                            ++$i;
+                            next;
+                        }
                     }
                 }
             }
@@ -122,9 +127,7 @@ sub capturing-group($term --> Str) {
     my Str $translation = '';
     $translation ~= '!' if $term<complemented>;
 
-    my Str $group = $term<contents>
-        ?? join ' | ', map { term($_) }, $term<contents>.flat
-        !! term($term<content>);
+    my Str $group = term($term<content>);
     
     $translation ~= qq{( $group )};
     return modify($term, $translation);

@@ -231,7 +231,7 @@ subtest sub {
     };
     is g4-to-perl6($character-class-with-space),
        q{grammar JSON { rule WS { <[ \s \t \n \r ]>+ } }},
-       'multiple comments at beginning';
+       'char class with space';
 
     my Str $repetition = q{
         grammar JSON;
