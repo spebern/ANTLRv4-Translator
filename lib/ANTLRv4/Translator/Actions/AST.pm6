@@ -38,7 +38,7 @@ class ANTLRv4::Translator::Actions::AST {
     method lexerAltList($/) {
         make {
             type     => 'alternation',
-            contents => $<lexerAlt>».made;
+            contents => $<lexerAlt>».made.flat;
         }
     }
 
@@ -50,7 +50,7 @@ class ANTLRv4::Translator::Actions::AST {
     }
 
     method lexerAlt($/) {
-        make $<lexerElement>.made;
+        make $<lexerElement>».made;
     }
 
     method parserAlt($/) {

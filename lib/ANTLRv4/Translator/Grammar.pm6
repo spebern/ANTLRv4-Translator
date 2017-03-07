@@ -365,7 +365,7 @@ rule lexerAltList
  
 rule lexerAlt
  	{
-	<COMMENTS>? <lexerElement> <lexerCommands>? <COMMENTS>? | ''
+	<COMMENTS>? <lexerElement>+ <lexerCommands>? <COMMENTS>? | ''
  	}
  
 rule lexerElement
