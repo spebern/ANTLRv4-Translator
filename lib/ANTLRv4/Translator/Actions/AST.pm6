@@ -26,15 +26,6 @@ class ANTLRv4::Translator::Actions::AST {
         }
     }
 
-    method lexerRuleBlock($/) {
-        if $<lexerAltList> {
-            make {
-                type     => 'alternation',
-                contents => $<lexerAltList>.made,
-            }
-        }
-    }
-
     method lexerAltList($/) {
         make {
             type     => 'alternation',
@@ -61,13 +52,6 @@ class ANTLRv4::Translator::Actions::AST {
         make {
             type     => 'alternation',
             contents => $<parserElement>».made,
-        }
-    }
-
-    method lexerElements($/) {
-        make {
-            type     => 'concatenation',
-            contents => $<lexerElement>».made,
         }
     }
 
@@ -155,21 +139,8 @@ class ANTLRv4::Translator::Actions::AST {
     }
 
     method lexerAtom($/) {
-        if $<notSet> {
-            my $notSet = $<notSet>;
-            if $notSet<setElement> {
-                make $notSet<setElement>.made;
-            }
-            elsif $notSet<blockSet> {
-                make $notSet<blockSet>.made;
-            }
-            $/.made<complemented> = True;
-        }
-        elsif $<LEXER_CHAR_SET> {
+        if $<LEXER_CHAR_SET> {
             make $<LEXER_CHAR_SET>.made;
-        }
-        elsif $<characterRange> {
-            make $<characterRange>.made;
         }
         elsif $<terminal> {
             make $<terminal>.made;
@@ -204,14 +175,6 @@ class ANTLRv4::Translator::Actions::AST {
         }
     }
 
-    method characterRange($/) {
-        make {
-            type => 'range',
-            from => $/<STRING_LITERAL>[0].Str.trim,
-            to   => $/<STRING_LITERAL>[1].Str.trim,
-        }
-    }
-
     method setElement($/) {
         if $<LEXER_CHAR_SET> {
             make $<LEXER_CHAR_SET>.made;
@@ -230,13 +193,6 @@ class ANTLRv4::Translator::Actions::AST {
                     content => $content,
                 }
             }
-        }
-    }
-
-    method blockSet($/) {
-        make {
-            type     => 'capturing group',
-            content  =>  $<setElement>.made,
         }
     }
 
