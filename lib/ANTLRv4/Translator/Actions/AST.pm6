@@ -27,16 +27,28 @@ class ANTLRv4::Translator::Actions::AST {
     }
 
     method lexerAltList($/) {
-        make {
-            type     => 'alternation',
-            contents => $<lexerAlt>».made.flat;
+        my @contents;
+        @contents.append: |$<lexerAlt>».made;
+        if @contents.elems == 1 {
+            make @contents[0];
+        }
+        else {
+            make {
+                type     => 'alternation',
+                contents => @contents,
+            }
         }
     }
 
     method parserAltList($/) {
-        make {
-            type     => 'alternation',
-            contents => $<parserAlt>».made,
+        if $<parserAlt>.elems == 1 {
+            make $<parserAlt>[0].made;
+        }
+        else {
+            make {
+                type     => 'alternation',
+                contents => $<parserAlt>».made,
+            }
         }
     }
 
