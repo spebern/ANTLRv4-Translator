@@ -1,225 +1,225 @@
 use v6;
 
-class ANTLRv4::Translator::Actions::AST {
-    method TOP($/) {
-        make {
-            name  => ~$<name>,
-            rules => $<ruleSpec>».made,
-        }
-    }
+unit class ANTLRv4::Translator::Actions::AST;
 
-    method ruleSpec($/) {
-        make $<parserRuleSpec>.made || $<lexerRuleSpec>.made;
+method TOP($/) {
+    make {
+        name  => ~$<name>,
+        rules => $<ruleSpec>».made,
     }
+}
 
-    method lexerRuleSpec($/) {
-        make {
-            name    => ~$<name>,
-            content => $<lexerAltList>.made,
-        }
+method ruleSpec($/) {
+    make $<parserRuleSpec>.made || $<lexerRuleSpec>.made;
+}
+
+method lexerRuleSpec($/) {
+    make {
+        name    => ~$<name>,
+        content => $<lexerAltList>.made,
     }
+}
 
-    method parserRuleSpec($/) {
-        make {
-            name    => ~$<name>,
-            content => $<parserAltList>.made,
-        }
+method parserRuleSpec($/) {
+    make {
+        name    => ~$<name>,
+        content => $<parserAltList>.made,
     }
+}
 
-    method lexerAltList($/) {
-        my @contents;
-        @contents.append: |$<lexerAlt>».made;
-        if @contents.elems == 1 {
-            make @contents[0];
-        }
-        else {
-            make {
-                type     => 'alternation',
-                contents => @contents,
-            }
-        }
+method lexerAltList($/) {
+    my @contents;
+    @contents.append: |$<lexerAlt>».made;
+    if @contents.elems == 1 {
+        make @contents[0];
     }
-
-    method parserAltList($/) {
-        if $<parserAlt>.elems == 1 {
-            make $<parserAlt>[0].made;
-        }
-        else {
-            make {
-                type     => 'alternation',
-                contents => $<parserAlt>».made,
-            }
-        }
-    }
-
-    method lexerAlt($/) {
-        make $<lexerElement>».made;
-    }
-
-    method parserAlt($/) {
-        make $<parserElement>.made;
-    }
-
-    method blockAltList($/) {
+    else {
         make {
             type     => 'alternation',
-            contents => $<parserElement>».made,
+            contents => @contents,
         }
     }
+}
 
-    method parserElement($/) {
+method parserAltList($/) {
+    if $<parserAlt>.elems == 1 {
+        make $<parserAlt>[0].made;
+    }
+    else {
         make {
-            type     => 'concatenation',
-            contents => $<element>».made,
+            type     => 'alternation',
+            contents => $<parserAlt>».made,
         }
     }
+}
 
-    method element($/) {
-        my Str $modifier = $<ebnfSuffix><MODIFIER>        ?? ~$<ebnfSuffix><MODIFIER>
-                        !! $<ebnf><ebnfSuffix><MODIFIER>  ?? ~$<ebnf><ebnfSuffix><MODIFIER> !! '';
-        my Bool $greedy  = $<ebnfSuffix><GREED>       ?? True
-                        !! $<ebnf><ebnfSuffix><GREED> ?? True !! False;
+method lexerAlt($/) {
+    make $<lexerElement>».made;
+}
 
-        if $<atom> {
-            make $<atom>.made;
-        }
-        elsif $<ebnf><block> {
-            make $<ebnf><block>.made;
-        }
+method parserAlt($/) {
+    make $<parserElement>.made;
+}
 
-        $/.made<modifier> = $modifier;
-        $/.made<greedy>   = $greedy;
+method blockAltList($/) {
+    make {
+        type     => 'alternation',
+        contents => $<parserElement>».made,
+    }
+}
+
+method parserElement($/) {
+    make {
+        type     => 'concatenation',
+        contents => $<element>».made,
+    }
+}
+
+method element($/) {
+    my Str $modifier = $<ebnfSuffix><MODIFIER>        ?? ~$<ebnfSuffix><MODIFIER>
+                    !! $<ebnf><ebnfSuffix><MODIFIER>  ?? ~$<ebnf><ebnfSuffix><MODIFIER> !! '';
+    my Bool $greedy  = $<ebnfSuffix><GREED>       ?? True
+                    !! $<ebnf><ebnfSuffix><GREED> ?? True !! False;
+
+    if $<atom> {
+        make $<atom>.made;
+    }
+    elsif $<ebnf><block> {
+        make $<ebnf><block>.made;
     }
 
-    method atom($/) {
-        if $<notSet> {
-            my $notSet = $<notSet>;
-            if $notSet<setElement> {
-                make $notSet<setElement>.made;
-            }
-            elsif $notSet<blockSet> {
-                make $notSet<blockSet>.made;
-            }
-            $/.made<complemented> = True;
+    $/.made<modifier> = $modifier;
+    $/.made<greedy>   = $greedy;
+}
+
+method atom($/) {
+    if $<notSet> {
+        my $notSet = $<notSet>;
+        if $notSet<setElement> {
+            make $notSet<setElement>.made;
         }
-        elsif $<LEXER_CHAR_SET> {
-            make $<LEXER_CHAR_SET>.made;
+        elsif $notSet<blockSet> {
+            make $notSet<blockSet>.made;
         }
-        elsif $<characterRange> {
-            make $<characterRange>.made;
-        }
-        elsif $<terminal> {
-            make $<terminal>.made;
-        }
-        else {
-            make {
-                type    => 'regular expression',
-                content => $/.Str.trim,
-            }
-        }
+        $/.made<complemented> = True;
     }
-
-    method lexerElement($/) {
-        my Str $modifier = $<ebnfSuffix><MODIFIER> ?? ~$<ebnfSuffix><MODIFIER> !! ''; 
-        my Bool $greedy  = $<ebnfSuffix><GREED> ?? True !! False;
-
-        if $<lexerAtom> {
-            make $<lexerAtom>.made;
-        }
-        elsif $<lexerBlock> {
-            make $<lexerBlock>.made;
-        }
-
-        $/.made<modifier> = $modifier;
-        $/.made<greedy>   = $greedy;
+    elsif $<LEXER_CHAR_SET> {
+        make $<LEXER_CHAR_SET>.made;
     }
-
-    method lexerBlock($/) {
+    elsif $<characterRange> {
+        make $<characterRange>.made;
+    }
+    elsif $<terminal> {
+        make $<terminal>.made;
+    }
+    else {
         make {
-            type         => 'capturing group',
-            content      =>  $<lexerAltList>.made,
-            complemented => $<NOT> ?? True !! False,
+            type    => 'regular expression',
+            content => $/.Str.trim,
         }
     }
+}
 
-    method block($/) {
+method lexerElement($/) {
+    my Str $modifier = $<ebnfSuffix><MODIFIER> ?? ~$<ebnfSuffix><MODIFIER> !! ''; 
+    my Bool $greedy  = $<ebnfSuffix><GREED> ?? True !! False;
+
+    if $<lexerAtom> {
+        make $<lexerAtom>.made;
+    }
+    elsif $<lexerBlock> {
+        make $<lexerBlock>.made;
+    }
+
+    $/.made<modifier> = $modifier;
+    $/.made<greedy>   = $greedy;
+}
+
+method lexerBlock($/) {
+    make {
+        type         => 'capturing group',
+        content      =>  $<lexerAltList>.made,
+        complemented => $<NOT> ?? True !! False,
+    }
+}
+
+method block($/) {
+    make {
+        type         => 'capturing group',
+        content      =>  $<blockAltList>.made,
+        complemented => $<NOT> ?? True !! False,
+    }
+}
+
+method lexerAtom($/) {
+    if $<LEXER_CHAR_SET> {
+        make $<LEXER_CHAR_SET>.made;
+    }
+    elsif $<terminal> {
+        make $<terminal>.made;
+    }
+    elsif $<range> {
+        make $<range>.made;
+    }
+    else {
         make {
-            type         => 'capturing group',
-            content      =>  $<blockAltList>.made,
-            complemented => $<NOT> ?? True !! False,
+            type    => 'regular expression',
+            content => $/.Str.trim,
         }
     }
+}
 
-    method lexerAtom($/) {
-        if $<LEXER_CHAR_SET> {
-            make $<LEXER_CHAR_SET>.made;
-        }
-        elsif $<terminal> {
-            make $<terminal>.made;
-        }
-        elsif $<range> {
-            make $<range>.made;
-        }
-        else {
-            make {
-                type    => 'regular expression',
-                content => $/.Str.trim,
-            }
-        }
+method LEXER_CHAR_SET($/) {
+    make {
+        type     => 'character class',
+        contents => $/[0]».<LEXER_CHAR_SET_RANGE>».made,
     }
+}
 
-    method LEXER_CHAR_SET($/) {
-        make {
-            type     => 'character class',
-            contents => $/[0]».<LEXER_CHAR_SET_RANGE>».made,
-        }
+method LEXER_CHAR_SET_RANGE($/) {
+    make ~$/ eq ' ' ?? '\s' !! ~$/;
+}
+
+method range($/) {
+    make {
+        type => 'range',
+        from => ~$/<from>,
+        to   => ~$/<to>,
     }
+}
 
-    method LEXER_CHAR_SET_RANGE($/) {
-        make ~$/ eq ' ' ?? '\s' !! ~$/;
+method setElement($/) {
+    if $<LEXER_CHAR_SET> {
+        make $<LEXER_CHAR_SET>.made;
     }
-
-    method range($/) {
-        make {
-            type => 'range',
-            from => ~$/<from>,
-            to   => ~$/<to>,
-        }
-    }
-
-    method setElement($/) {
-        if $<LEXER_CHAR_SET> {
-            make $<LEXER_CHAR_SET>.made;
-        }
-        else {
-            my Str $content = $/.Str.trim;
-            if $content eq q{'"'} {
-                make {
-                    type     => 'character class',
-                    contents => [ '"' ],
-                }
-            }
-            else {
-                make {
-                    type    => $<terminal><STRING_LITERAL> ?? 'terminal' !! 'nonterminal',
-                    content => $content,
-                }
-            }
-        }
-    }
-
-    method terminal($/) {
+    else {
         my Str $content = $/.Str.trim;
-        given $content {
-            # '""' is a escaped quote
-            when q{'""'} { $content = q{'\"'}}
-            when q{'\r'} { $content = '\r' }
-            when q{'\n'} { $content = '\n' }
+        if $content eq q{'"'} {
+            make {
+               type     => 'character class',
+               contents => [ '"' ],
+            }
         }
+        else {
+            make {
+                type    => $<terminal><STRING_LITERAL> ?? 'terminal' !! 'nonterminal',
+                content => $content,
+            }
+        }
+    }
+}
 
-        make {
-            type    => $<STRING_LITERAL> ?? 'terminal' !! 'nonterminal',
-            content => $content,
-        }
+method terminal($/) {
+    my Str $content = $/.Str.trim;
+    given $content {
+        # '""' is a escaped quote
+        when q{'""'} { $content = q{'\"'}}
+        when q{'\r'} { $content = '\r' }
+        when q{'\n'} { $content = '\n' }
+    }
+
+    make {
+        type    => $<STRING_LITERAL> ?? 'terminal' !! 'nonterminal',
+        content => $content,
     }
 }
