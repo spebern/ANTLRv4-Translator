@@ -5,6 +5,11 @@ use JSON::Tiny;
 use ANTLRv4::Translator::Grammar;
 use ANTLRv4::Translator::Actions::AST;
 
+sub java-to-perl-utf8(Str $utf8 is copy) {
+    $utf8 ~~ s/\\u(....)/\\x[$0]/;
+    return $utf8;
+}
+
 sub rule($ast --> Str) {
     my Str $rule = '';
 
@@ -75,7 +80,8 @@ sub concatenation($ast --> Str) {
 
 sub terminal($ast --> Str) {
     my Str $translation = $ast<complemented> ?? '!' !! '';
-    return $translation ~ modify($ast, $ast<content>) ~ json-info($ast, <options label commands>);
+    my Str $content = java-to-perl-utf8($ast<content>);
+    return $translation ~ modify($ast, $content) ~ json-info($ast, <options label commands>);
 };
 
 sub nonterminal($ast --> Str) {
@@ -88,7 +94,8 @@ sub nonterminal($ast --> Str) {
 sub range($ast --> Str) {
     my Str $translation = '';
     $translation ~= '!' if $ast<complemented>;
-    $translation ~= qq{$ast<from>..$ast<to>};
+    my Str ($from, $to) = ($ast<from>, $ast<to>).map({ java-to-perl-utf8($_) });
+    $translation ~= qq{$from..$to};
     return modify($ast, $translation);
 };
 

@@ -62,9 +62,9 @@ subtest sub {
            q{grammar Minimal { rule number { 'a123b' } }},
            'mixed alphanumeric terminal';
 
-        # is g4-to-perl6( q{grammar Minimal; number : '\u263a' ;}),
-        #    q{grammar Minimal { rule number { '\x[263a]' } }},
-        #    'Unicode terminal';
+        is g4-to-perl6( q{grammar Minimal; number : '\u263a' ;}),
+           q{grammar Minimal { rule number { '\x[263a]' } }},
+           'Unicode terminal';
     }, 'terminal of different types';
 
     subtest sub {
@@ -139,9 +139,9 @@ subtest sub {
        q{grammar Minimal { rule number { 'a'..'z' } }},
        'range';
 
-    # is g4-to-perl6( q{grammar Minimal; number : '\u263a'..'\u263f' ;}),
-    #    q{grammar Minimal { rule number { '\x[263a]'..'\x[263f]' } }},
-    #    'Unicode range';
+    is g4-to-perl6( q{grammar Minimal; number : '\u263a'..'\u263f' ;}),
+       q{grammar Minimal { rule number { '\x[263a]'..'\x[263f]' } }},
+       'Unicode range';
 
     subtest sub {
         is g4-to-perl6( q{grammar Minimal; number : 'a'..'z'* ;}),
