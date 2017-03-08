@@ -131,9 +131,15 @@ method blockAltList($/) {
 }
 
 method parserElement($/) {
-    make {
-        type     => 'concatenation',
-        contents => $<element>».made,
+    my @contents = $<element>».made;
+    if @contents.elems == 1 {
+        make @contents[0];
+    }
+    else {
+        make {
+            type     => 'concatenation',
+            contents => @contents,
+        }
     }
 }
 
