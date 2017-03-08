@@ -1,6 +1,7 @@
 use v6;
 
 unit module ANTLRv4::Translator;
+use JSON::Tiny;
 use ANTLRv4::Translator::Grammar;
 use ANTLRv4::Translator::Actions::AST;
 
@@ -174,13 +175,20 @@ sub term($term --> Str) {
     return $translation;
 }
 
+sub json-info($ast) {
+    my %json = |<type options imports tokens actions>.grep({ $ast{$_} }).map({$_ => $ast{$_}});
+    return %json.elems ?? to-json(%json) !! Nil;
+}
+
 sub ast($ast --> Str) {
     my Str $rules = '';
     # $rules = join ' ', map { rule($_) }, $ast<rules>.flat;
     $rules = join "\n", map { rule($_) }, $ast<rules>.flat;
 
-    my Str $grammar = qq{grammar $ast<name> { $rules }};
+    my $json-info = json-info($ast);
 
+    my Str $grammar = qq{grammar $ast<name> { $rules }};
+    $grammar ~= $json-info ?? qq{ #=$json-info} !! '';
     return $grammar;
 }
 

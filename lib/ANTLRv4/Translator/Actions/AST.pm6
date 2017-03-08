@@ -5,8 +5,60 @@ unit class ANTLRv4::Translator::Actions::AST;
 method TOP($/) {
     make {
         name  => ~$<name>,
+        type  => $<grammarType>.made,
         rules => $<ruleSpec>».made,
+        |<options imports tokens actions>.map(
+            -> $key {
+                $key => $<prequelConstruct>.grep({ $_{$key} }).map({ |$_{$key}.made })
+            }
+        ),
     }
+}
+
+
+method action($/) {
+    make ~$<action_name> => ~$<ACTION>;
+}
+
+method tokensSpec($/) {
+    make $<ID_list_trailing_comma>.made;
+}
+
+method ID_list_trailing_comma($/) {
+    make $<ID>».made;
+}
+
+method delegateGrammars($/) {
+    make $<delegateGrammar>».made;
+}
+
+method delegateGrammar($/) {
+    make ~$<key> => $<value>.made;
+}
+
+method optionsSpec($/) {
+    make $<option>».made;
+}
+
+method option($/) {
+    make ~$<key> => $<optionValue>.made;
+}
+
+method optionValue($/) {
+    make $<DIGITS> ?? +$<DIGITS>            !! $<STRING_LITERAL>
+                   ?? ~$<STRING_LITERAL>[0] !! $<ID_list>.made;
+}
+
+method ID_list($/) {
+    make $<ID>».made;
+}
+
+method ID($/) {
+    make ~$/;
+}
+
+method grammarType($/) {
+    make ~$/[0] if $/[0];
 }
 
 method ruleSpec($/) {

@@ -4,9 +4,31 @@ use ANTLRv4::Translator;
 
 plan 7;
 
-is g4-to-perl6(q{grammar Minimal;}),
-   q{grammar Minimal {  }},
-   'minimal grammar';
+subtest sub {
+    is g4-to-perl6( q{grammar Minimal;} ),
+       q{grammar Minimal {  }},
+       'minimal grammar';
+
+    is g4-to-perl6( q{lexer grammar Minimal;} ),
+       q{grammar Minimal {  } #={ "type" : "lexer" }},
+       'optional type';
+
+    is g4-to-perl6( q{grammar Minimal; options {a=2;}} ),
+       q{grammar Minimal {  } #={ "options" : [ { "a" : 2 } ] }},
+       'optional options';
+
+    is g4-to-perl6( q{grammar Minimal; import Foo;} ),
+       q{grammar Minimal {  } #={ "imports" : [ { "Foo" : null } ] }},
+        'optional import';
+
+    is g4-to-perl6( q{grammar Minimal; tokens { INDENT, DEDENT }} ),
+       q{grammar Minimal {  } #={ "tokens" : [ "INDENT", "DEDENT" ] }},
+       'optional tokens';
+
+    is g4-to-perl6( q{grammar Minimal; @members { int i = 0; }} ),
+      q{grammar Minimal {  } #={ "actions" : [ { "@members" : "{ int i = 0; }" } ] }},
+      'optional actions';
+}, 'Grammar and its options';
 
 subtest sub {
     is g4-to-perl6( q{grammar Minimal; number : '1' ;}),
