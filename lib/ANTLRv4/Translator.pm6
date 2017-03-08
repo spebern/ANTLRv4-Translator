@@ -11,8 +11,7 @@ sub rule($ast --> Str) {
     my Str $translation = join ' ', term($ast<content>);
     $rule = qq{rule $ast<name> { $translation }};
 
-    my $json-info = json-info($ast, <attribute action returns throws locals options>);
-    $rule ~= $json-info ?? qq{ #=$json-info} !! '';
+    $rule ~= json-info($ast, <attribute action returns throws locals options>);
 
     return $rule;
 }
@@ -76,7 +75,7 @@ sub concatenation($ast --> Str) {
 
 sub terminal($ast --> Str) {
     my Str $translation = $ast<complemented> ?? '!' !! '';
-    return $translation ~ modify($ast, $ast<content>);
+    return $translation ~ modify($ast, $ast<content>) ~ json-info($ast, <options label commands>);
 };
 
 sub nonterminal($ast --> Str) {
@@ -141,6 +140,10 @@ sub capturing-group($ast --> Str) {
     return modify($ast, $translation);
 }
 
+sub action($ast --> Str) {
+    return json-info($ast, (<content>, ));
+}
+
 sub term($ast --> Str) {
     my Str $translation = '';
 
@@ -169,6 +172,9 @@ sub term($ast --> Str) {
         when 'regular expression' {
             $translation = regular-expression($ast);
         }
+        when 'action' {
+            $translation = action($ast);
+        }
         default {
             if $ast<type> {
                 die "unkown type '$ast<type>'";
@@ -182,9 +188,9 @@ sub term($ast --> Str) {
     return $translation;
 }
 
-sub json-info($ast, @keys) {
+sub json-info($ast, @keys --> Str) {
     my %json = |@keys.grep({ $ast{$_} }).map({$_ => $ast{$_}});
-    return %json.elems ?? to-json(%json) !! Nil;
+    return %json.elems ?? ' #=' ~ to-json(%json) !! '';
 }
 
 sub ast($ast --> Str) {
@@ -192,10 +198,8 @@ sub ast($ast --> Str) {
     # $rules = join ' ', map { rule($_) }, $ast<rules>.flat;
     $rules = join "\n", map { rule($_) }, $ast<rules>.flat;
 
-    my $json-info = json-info($ast, <type options imports tokens actions>);
-
     my Str $grammar = qq{grammar $ast<name> { $rules }};
-    $grammar ~= $json-info ?? qq{ #=$json-info} !! '';
+    $grammar ~= json-info($ast, <type options imports tokens actions>);
     return $grammar;
 }
 

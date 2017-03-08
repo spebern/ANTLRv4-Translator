@@ -47,6 +47,15 @@ method option($/) {
     make ~$<key> => $<optionValue>.made;
 }
 
+method elementOptions($/) {
+    make $<option>».made;
+}
+
+method elementOption($/) {
+    make ~$<key> => $<value>.made;
+}
+
+
 method optionValue($/) {
     make $<DIGITS> ?? +$<DIGITS>            !! $<STRING_LITERAL>
                    ?? ~$<STRING_LITERAL>[0] !! $<ID_list>.made;
@@ -117,10 +126,25 @@ method parserAltList($/) {
 
 method lexerAlt($/) {
     make $<lexerElement>».made;
+
+    if $<lexerCommands> {
+        $/.made[* - 1]<commands> = $<lexerCommands>.made;
+    }
+}
+
+method lexerCommands($/) {
+    make $<lexerCommand>».made;
+}
+
+method lexerCommand($/) {
+    make { ~$<ID> => Nil };
 }
 
 method parserAlt($/) {
     make $<parserElement>.made;
+    $/.made<options label> =
+        $<parserElement><options> ?? $<parserElement><options>.made !! Nil,
+        $<label>                  ?? ~$<label>                      !! Nil;
 }
 
 method blockAltList($/) {
@@ -152,6 +176,12 @@ method element($/) {
     if $<atom> {
         make $<atom>.made;
     }
+    elsif $<ACTION> {
+        make {
+            type    => 'action',
+            content => ~$<ACTION>,
+        }
+    } 
     elsif $<ebnf><block> {
         make $<ebnf><block>.made;
     }

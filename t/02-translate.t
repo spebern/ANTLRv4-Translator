@@ -92,6 +92,24 @@ subtest sub {
            q{grammar Minimal { rule number { '1' } #={ "options" : [ { "a" : 2 } ] } }},
            'optional local variables';
     }, 'Single rule and rule-level options';
+
+    subtest sub {
+        is g4-to-perl6( q{grammar Minimal; number : <assoc=right> '1' ;}),
+           q{grammar Minimal { rule number { '1' #={ "options" : [ { "assoc" : "right" } ] } } }},
+           'optional option';
+
+        is g4-to-perl6( q{grammar Minimal; number : '1' # One ;}),
+           q{grammar Minimal { rule number { '1' #={ "label" : "One" } } }},
+           'optional label';
+
+        is g4-to-perl6( q{grammar Minimal; number : '1' -> skip ;}),
+           q{grammar Minimal { rule number { '1' #={ "commands" : [ { "skip" : null } ] } } }},
+           'optional command';
+
+        is g4-to-perl6( q{grammar Minimal; number : {$amount = 0;} '1' ;}),
+           q{grammar Minimal { rule number { #={ "content" : "{$amount = 0;}" } '1' } }},
+           'optional action';
+    }, 'Single rule and term-level options';
 }
 
 subtest sub {

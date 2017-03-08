@@ -412,7 +412,7 @@ rule blockAltList
  
 rule parserElement
  	{
-	<elementOptions>? <element>*
+	<options=elementOptions>? <element>*
  	}
  
 rule element
@@ -515,7 +515,7 @@ rule terminal
  
 rule elementOptions
  	{
-	'<' <elementOption>+ % ',' '>'
+	'<' <option=elementOption>+ % ',' '>'
  	}
  
 rule elementOption
