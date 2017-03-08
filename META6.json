@@ -2,7 +2,9 @@
   "authors" : [
     "spebern"
   ],
-  "build-depends" : [ ],
+  "build-depends" : [
+    "JSON::Tiny"
+  ],
   "depends" : [ ],
   "description" : "blah blah blah",
   "name" : "ANTLRv4::Translator",
