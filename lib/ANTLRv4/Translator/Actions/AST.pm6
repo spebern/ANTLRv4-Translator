@@ -234,8 +234,8 @@ method LEXER_CHAR_SET_RANGE($/) {
 method range($/) {
     make {
         type => 'range',
-        from => ~$/<from>,
-        to   => ~$/<to>,
+        from => ~$<from>,
+        to   => ~$<to>,
     }
 }
 
