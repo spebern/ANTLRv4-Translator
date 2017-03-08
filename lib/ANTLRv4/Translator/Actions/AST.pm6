@@ -328,10 +328,8 @@ method setElement($/) {
 }
 
 method terminal($/) {
-    my Str $content = $/.Str.trim;
-
     make {
         type    => $<STRING_LITERAL> ?? 'terminal' !! 'nonterminal',
-        content => $content,
+        content => $/.Str.trim,
     }
 }
