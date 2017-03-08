@@ -89,6 +89,7 @@ method parserRuleSpec($/) {
 }
 
 method lexerAltList($/) {
+    # There must be a nicer way...
     my @contents;
     @contents.append: |$<lexerAlt>».made;
     if @contents.elems == 1 {
