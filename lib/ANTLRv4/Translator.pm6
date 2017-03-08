@@ -8,7 +8,6 @@ use ANTLRv4::Translator::Actions::AST;
 sub rule($ast --> Str) {
     my Str $rule = '';
 
-    # my Str $translation = join ' ', $ast<contents> ?? term($ast<content>) !! map { term($_) }, $ast<contents>;
     my Str $translation = join ' ', term($ast<content>);
     $rule = qq{rule $ast<name> { $translation }};
 

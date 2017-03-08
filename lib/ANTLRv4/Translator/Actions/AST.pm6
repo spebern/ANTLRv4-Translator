@@ -214,8 +214,8 @@ method atom($/) {
     elsif $<LEXER_CHAR_SET> {
         make $<LEXER_CHAR_SET>.made;
     }
-    elsif $<characterRange> {
-        make $<characterRange>.made;
+    elsif $<range> {
+        make $<range>.made;
     }
     elsif $<terminal> {
         make $<terminal>.made;
@@ -260,14 +260,24 @@ method block($/) {
 }
 
 method lexerAtom($/) {
-    if $<LEXER_CHAR_SET> {
-        make $<LEXER_CHAR_SET>.made;
+    if $<notSet> {
+        my $notSet = $<notSet>;
+        if $notSet<setElement> {
+            make $notSet<setElement>.made;
+        }
+        elsif $notSet<blockSet> {
+            make $notSet<blockSet>.made;
+        }
+        $/.made<complemented> = True;
     }
-    elsif $<terminal> {
-        make $<terminal>.made;
+    elsif $<LEXER_CHAR_SET> {
+        make $<LEXER_CHAR_SET>.made;
     }
     elsif $<range> {
         make $<range>.made;
+    }
+    elsif $<terminal> {
+        make $<terminal>.made;
     }
     else {
         make {

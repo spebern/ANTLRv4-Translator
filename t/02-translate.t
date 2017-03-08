@@ -2,7 +2,7 @@ use v6;
 use Test;
 use ANTLRv4::Translator;
 
-plan 8;
+plan 9;
 
 subtest sub {
     is g4-to-perl6( q{grammar Minimal;} ),
@@ -262,6 +262,12 @@ subtest sub {
        q{grammar Minimal { rule number { !'1'+? #={ "label" : "One" } } }},
        'with label';
 }, 'concatenated options';
+
+subtest sub {
+    is g4-to-perl6( q{grammar Minimal; number : ~'1'+? -> skip ;}),
+       q{grammar Minimal { rule number { !'1'+? #={ "commands" : [ { "skip" : null } ] } } }},
+       'with complement';
+}, 'concatenated commands';
 
 subtest sub {
     is g4-to-perl6( q{grammar Minimal; number : ( '1' ) ;}),
