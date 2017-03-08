@@ -66,7 +66,33 @@ subtest sub {
         #    q{grammar Minimal { rule number { '\x[263a]' } }},
         #    'Unicode terminal';
     }, 'terminal of different types';
-}, 'Single rule and rule-level options';
+
+    subtest sub {
+        is g4-to-perl6( q{grammar Minimal; protected number : '1';}),
+           q{grammar Minimal { rule number { '1' } #={ "attribute" : "protected" } }},
+           'rule with attribute';
+
+        is g4-to-perl6( q{grammar Minimal; number [int x] : '1';}),
+           q{grammar Minimal { rule number { '1' } #={ "action" : "[int x]" } }},
+           'optional action';
+
+        is g4-to-perl6( q{grammar Minimal; number returns [int x] : '1';}),
+           q{grammar Minimal { rule number { '1' } #={ "returns" : "[int x]" } }},
+           'optional return type';
+
+        is g4-to-perl6( q{grammar Minimal; number throws XFoo : '1';}),
+           q{grammar Minimal { rule number { '1' } #={ "throws" : [ "XFoo" ] } }},
+           'optional exception';
+
+        is g4-to-perl6( q{grammar Minimal; number locals [int y] : '1';}),
+           q{grammar Minimal { rule number { '1' } #={ "locals" : "[int y]" } }},
+           'optional local';
+
+        is g4-to-perl6( q{grammar Minimal; number options{a=2;} : '1';}),
+           q{grammar Minimal { rule number { '1' } #={ "options" : [ { "a" : 2 } ] } }},
+           'optional local variables';
+    }, 'Single rule and rule-level options';
+}
 
 subtest sub {
     is g4-to-perl6( q{grammar Minimal; number : ab ;}),

@@ -5,22 +5,29 @@ use JSON::Tiny;
 use ANTLRv4::Translator::Grammar;
 use ANTLRv4::Translator::Actions::AST;
 
-sub rule($rule --> Str) {
-    my Str $translation = join ' ', term($rule<content>);
-    return qq{rule $rule<name> { $translation }};
+sub rule($ast --> Str) {
+    my Str $rule = '';
+
+    my Str $translation = join ' ', term($ast<content>);
+    $rule = qq{rule $ast<name> { $translation }};
+
+    my $json-info = json-info($ast, <attribute action returns throws locals options>);
+    $rule ~= $json-info ?? qq{ #=$json-info} !! '';
+
+    return $rule;
 }
 
-sub modify($term, $term-str is copy --> Str) {
-    $term-str ~= $term<modifier> if $term<modifier>;
-    $term-str ~= '?' if $term<greedy>;
-    return $term-str;
+sub modify($ast, $term is copy --> Str) {
+    $term ~= $ast<modifier> if $ast<modifier>;
+    $term ~= '?' if $ast<greedy>;
+    return $term;
 }
 
-sub alternation($term --> Str) {
-    return join ' | ', map { term($_) }, $term<contents>.flat;
+sub alternation($ast --> Str) {
+    return join ' | ', map { term($_) }, $ast<contents>.flat;
 }
 
-sub concatenation($term --> Str) {
+sub concatenation($ast --> Str) {
     my Str $translation = '';
 
     # this most likely has some errors in it
@@ -28,13 +35,13 @@ sub concatenation($term --> Str) {
     # value ( ',' value )* should become ( <value>+ %% ',' )
     # this eases the use of the generated grammar
     my Int $i = 0;
-    while $i < $term<contents>.elems {
-        my $content = $term<contents>[$i];
+    while $i < $ast<contents>.elems {
+        my $content = $ast<contents>[$i];
 
         if $content<type> eq 'terminal' | 'nonterminal' {
             my Str $content-translation = term($content);
 
-            my $next-content = ++$i < $term<contents>.elems ?? $term<contents>[$i] !! Nil;
+            my $next-content = ++$i < $ast<contents>.elems ?? $ast<contents>[$i] !! Nil;
 
             if $next-content && $next-content<type> eq 'capturing group' {
                 if $next-content<content><type> eq 'alternation' {
@@ -67,28 +74,28 @@ sub concatenation($term --> Str) {
     return $translation.trim;
 };
 
-sub terminal($term --> Str) {
-    my Str $translation = $term<complemented> ?? '!' !! '';
-    return $translation ~ modify($term, $term<content>);
+sub terminal($ast --> Str) {
+    my Str $translation = $ast<complemented> ?? '!' !! '';
+    return $translation ~ modify($ast, $ast<content>);
 };
 
-sub nonterminal($term --> Str) {
+sub nonterminal($ast --> Str) {
     my Str $translation = '<';
-    $translation ~= '!' if $term<complemented>;
-    $translation ~= $term<content> ~ '>';
-    return modify($term, $translation);
+    $translation ~= '!' if $ast<complemented>;
+    $translation ~= $ast<content> ~ '>';
+    return modify($ast, $translation);
 };
 
-sub range($term --> Str) {
+sub range($ast --> Str) {
     my Str $translation = '';
-    $translation ~= '!' if $term<complemented>;
-    $translation ~= qq{$term<from>..$term<to>};
-    return modify($term, $translation);
+    $translation ~= '!' if $ast<complemented>;
+    $translation ~= qq{$ast<from>..$ast<to>};
+    return modify($ast, $translation);
 };
 
-sub character-class($term --> Str) {
+sub character-class($ast --> Str) {
     my Str $translation = '<';
-    $translation ~= '-' if $term<complemented>;
+    $translation ~= '-' if $ast<complemented>;
     $translation ~= '[ ';
 
     $translation ~= join ' ', map {
@@ -110,61 +117,61 @@ sub character-class($term --> Str) {
         else {
             $_;
         }
-    }, $term<contents>.flat;
+    }, $ast<contents>.flat;
 
     $translation ~= ' ]>';
 
-    return modify($term, $translation);
+    return modify($ast, $translation);
 };
 
-sub regular-expression($term --> Str) {
+sub regular-expression($ast --> Str) {
     my Str $translation = '';
-    $translation ~= '!' if $term<complemented>;
-    $translation ~= $term<content>;
-    return modify($term, $translation);
+    $translation ~= '!' if $ast<complemented>;
+    $translation ~= $ast<content>;
+    return modify($ast, $translation);
 };
 
-sub capturing-group($term --> Str) {
+sub capturing-group($ast --> Str) {
     my Str $translation = '';
-    $translation ~= '!' if $term<complemented>;
+    $translation ~= '!' if $ast<complemented>;
 
-    my Str $group = term($term<content>);
+    my Str $group = term($ast<content>);
     
     $translation ~= qq{( $group )};
-    return modify($term, $translation);
+    return modify($ast, $translation);
 }
 
-sub term($term --> Str) {
+sub term($ast --> Str) {
     my Str $translation = '';
 
-    given $term<type> {
+    given $ast<type> {
         when 'alternation' {
-            $translation = alternation($term);
+            $translation = alternation($ast);
         }
         when 'concatenation' {
-            $translation = concatenation($term);
+            $translation = concatenation($ast);
         }
         when 'terminal' {
-            $translation = terminal($term);
+            $translation = terminal($ast);
         }
         when 'nonterminal' {
-            $translation = nonterminal($term);
+            $translation = nonterminal($ast);
         }
         when 'range' {
-            $translation = range($term);
+            $translation = range($ast);
         }
         when 'character class' {
-            $translation = character-class($term);
+            $translation = character-class($ast);
         }
         when 'capturing group' {
-            $translation = capturing-group($term);
+            $translation = capturing-group($ast);
         }
         when 'regular expression' {
-            $translation = regular-expression($term);
+            $translation = regular-expression($ast);
         }
         default {
-            if $term<type> {
-                die "unkown type '$term<type>'";
+            if $ast<type> {
+                die "unkown type '$ast<type>'";
             }
             else {
                 die "missing type";
@@ -175,8 +182,8 @@ sub term($term --> Str) {
     return $translation;
 }
 
-sub json-info($ast) {
-    my %json = |<type options imports tokens actions>.grep({ $ast{$_} }).map({$_ => $ast{$_}});
+sub json-info($ast, @keys) {
+    my %json = |@keys.grep({ $ast{$_} }).map({$_ => $ast{$_}});
     return %json.elems ?? to-json(%json) !! Nil;
 }
 
@@ -185,7 +192,7 @@ sub ast($ast --> Str) {
     # $rules = join ' ', map { rule($_) }, $ast<rules>.flat;
     $rules = join "\n", map { rule($_) }, $ast<rules>.flat;
 
-    my $json-info = json-info($ast);
+    my $json-info = json-info($ast, <type options imports tokens actions>);
 
     my Str $grammar = qq{grammar $ast<name> { $rules }};
     $grammar ~= $json-info ?? qq{ #=$json-info} !! '';

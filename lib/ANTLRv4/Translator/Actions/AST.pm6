@@ -15,6 +15,10 @@ method TOP($/) {
     }
 }
 
+method throwsSpec($/) {
+    make $<ID>».made;
+}
+
 method action($/) {
     make ~$<action_name> => ~$<ACTION>;
 }
@@ -66,15 +70,21 @@ method ruleSpec($/) {
 
 method lexerRuleSpec($/) {
     make {
-        name    => ~$<name>,
-        content => $<lexerAltList>.made,
+        name      => ~$<name>,
+        content   => $<lexerAltList>.made,
     }
 }
 
 method parserRuleSpec($/) {
     make {
-        name    => ~$<name>,
-        content => $<parserAltList>.made,
+        name      => ~$<name>,
+        content   => $<parserAltList>.made,
+        attribute => $<attribute> ?? ~$<attribute>           !! Nil,
+        action    => $<action>    ?? ~$<action>              !! Nil,
+        returns   => $<returns>   ?? ~$<returns><ARG_ACTION> !! Nil,
+        throws    => $<throws>    ??  $<throws>.made         !! Nil,
+        locals    => $<locals>    ?? ~$<locals><ARG_ACTION>  !! Nil,
+        options   => $<options>   ??  $<options>.made        !! Nil,
     }
 }
 
