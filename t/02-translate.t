@@ -248,6 +248,9 @@ subtest sub {
     is g4-to-perl6( q{grammar Minimal; number : 'a' | 'b';}),
        q{grammar Minimal { rule number { 'a' | 'b' } }},
        'two alternated terms';
+    is g4-to-perl6( q{grammar Minimal; number : 'a' | 'b' -> skip ;}),
+       q{grammar Minimal { rule number { 'a' | 'b' #={ "commands" : [ { "skip" : null } ] } } }},
+       'two alternated terms with skipping';
 }, 'alternation test';
 
 subtest sub {
