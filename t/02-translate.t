@@ -2,7 +2,7 @@ use v6;
 use Test;
 use ANTLRv4::Translator;
 
-plan 7;
+plan 8;
 
 subtest sub {
     is g4-to-perl6( q{grammar Minimal;} ),
@@ -252,6 +252,16 @@ subtest sub {
        q{grammar Minimal { rule number { 'a' | 'b' #={ "commands" : [ { "skip" : null } ] } } }},
        'two alternated terms with skipping';
 }, 'alternation test';
+
+subtest sub {
+    is g4-to-perl6( q{grammar Minimal; number : <assoc=right> ~'1'+? ;}),
+       q{grammar Minimal { rule number { !'1'+? #={ "options" : [ { "assoc" : "right" } ] } } }},
+       'with option';
+
+    is g4-to-perl6( q{grammar Minimal; number : ~'1'+? # One ;}),
+       q{grammar Minimal { rule number { !'1'+? #={ "label" : "One" } } }},
+       'with label';
+}, 'concatenated options';
 
 subtest sub {
     is g4-to-perl6( q{grammar Minimal; number : ( '1' ) ;}),
