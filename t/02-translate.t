@@ -235,6 +235,9 @@ subtest sub {
     is g4-to-perl6( q{grammar Minimal; number : 'a' 'b';}),
        q{grammar Minimal { rule number { 'a' 'b' } }},
        'two concatenated terms';
+    is g4-to-perl6( q{grammar Minimal; number : 'a' 'b' -> skip ;}),
+       q{grammar Minimal { rule number { 'a' 'b' #={ "commands" : [ { "skip" : null } ] } } }},
+       'two concatenated terms with skipping';
 }, 'concatenation test';
 
 subtest sub {

@@ -99,8 +99,8 @@ method parserRuleSpec($/) {
 
 method lexerAltList($/) {
     # There must be a nicer way...
-    my @contents;
-    @contents.append: |$<lexerAlt>».made;
+    my @contents = $<lexerAlt>».made;
+    # @contents.append: |$<lexerAlt>».made;
     if @contents.elems == 1 {
         make @contents[0];
     }
@@ -125,10 +125,20 @@ method parserAltList($/) {
 }
 
 method lexerAlt($/) {
-    make $<lexerElement>».made;
+    my @elements = $<lexerElement>».made;
+
+    if @elements.elems == 1 {
+        make @elements[0];
+    }
+    else {
+        make {
+            type     => 'concatenation',
+            contents => @elements,
+        }
+    }
 
     if $<lexerCommands> {
-        $/.made[* - 1]<commands> = $<lexerCommands>.made;
+        $/.made<commands> = $<lexerCommands>.made;
     }
 }
 

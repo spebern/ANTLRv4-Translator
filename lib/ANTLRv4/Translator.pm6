@@ -8,6 +8,7 @@ use ANTLRv4::Translator::Actions::AST;
 sub rule($ast --> Str) {
     my Str $rule = '';
 
+    # my Str $translation = join ' ', $ast<contents> ?? term($ast<content>) !! map { term($_) }, $ast<contents>;
     my Str $translation = join ' ', term($ast<content>);
     $rule = qq{rule $ast<name> { $translation }};
 
@@ -70,7 +71,7 @@ sub concatenation($ast --> Str) {
         }
     }
     # $translation ~= join ' ', map { term($_) }, $term<contents>.flat;
-    return $translation.trim;
+    return $translation.trim ~ json-info($ast, (<commands>, ));
 };
 
 sub terminal($ast --> Str) {
