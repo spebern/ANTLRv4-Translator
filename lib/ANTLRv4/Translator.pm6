@@ -80,7 +80,16 @@ sub concatenation($ast --> Str) {
 
 sub terminal($ast --> Str) {
     my Str $translation = $ast<complemented> ?? '!' !! '';
-    my Str $content = java-to-perl-utf8($ast<content>);
+
+    my Str $content;
+    given $ast<content> {
+        # '""' is a escaped quote
+        when q{'""'} { $content = q{'\"'}}
+        when q{'\r'} { $content = '\r' }
+        when q{'\n'} { $content = '\n' }
+        default      { $content = java-to-perl-utf8($_) }
+    }
+
     return $translation ~ modify($ast, $content) ~ json-info($ast, <options label commands>);
 };
 

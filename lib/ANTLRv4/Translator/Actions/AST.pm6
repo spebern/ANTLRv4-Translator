@@ -329,12 +329,6 @@ method setElement($/) {
 
 method terminal($/) {
     my Str $content = $/.Str.trim;
-    given $content {
-        # '""' is a escaped quote
-        when q{'""'} { $content = q{'\"'}}
-        when q{'\r'} { $content = '\r' }
-        when q{'\n'} { $content = '\n' }
-    }
 
     make {
         type    => $<STRING_LITERAL> ?? 'terminal' !! 'nonterminal',
